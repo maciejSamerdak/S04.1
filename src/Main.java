@@ -3,8 +3,9 @@ import java.util.Random;
 
 public class Main {
 
-	static int memorySize = 20;		//iloœæ ramek w pamiêci fizycznej
+	static int memorySize = 50;		//iloœæ ramek w pamiêci fizycznej
 	static int procQuantity = 10;	//iloœæ procesów
+	static int pointersQuantity = 300;	//iloœæ stron
 	
 	
 	static Pointer[] memory = new Pointer[memorySize];		//pamiêæ
@@ -14,43 +15,46 @@ public class Main {
 		Random rn = new Random();
 		
 		Process[] processes = new Process[procQuantity];
-		Process[] processes2 = new Process[procQuantity];
-		Process[] processes3 = new Process[procQuantity];
-		Process[] processes4 = new Process[procQuantity];
+		//Process[] processes2 = new Process[procQuantity];
+		//Process[] processes3 = new Process[procQuantity];
+		//Process[] processes4 = new Process[procQuantity];
 		
 		for (int i=0; i<processes.length; i++){				//tworzenie procesów
 			int pointers = rn.nextInt(6)+5;
-			int tasksAm = pointers*3;
-			processes[i]=new Process(tasksAm, pointers);
+			//int tasksAm = pointers*3;
+			processes[i]=new Process(pointers);
 			//System.out.println(processes[i].pointers);
-			processes2[i]=new Process(tasksAm, pointers);
+			//processes2[i]=new Process(pointers);
 			//System.out.println(processes2[i].pointers);
-			processes3[i]=new Process(tasksAm, pointers);
+			//processes3[i]=new Process(pointers);
 			//System.out.println(processes3[i].pointers);
-			processes4[i]=new Process(tasksAm, pointers);
+			//processes4[i]=new Process(pointers);
 			//System.out.println(processes4[i].pointers);
 		}
-			
+		
 		ArrayDeque<Pointer> tasks=new ArrayDeque<Pointer>();	//ci¹g stron
 		ArrayDeque<Pointer> tasks2=new ArrayDeque<Pointer>();
 		ArrayDeque<Pointer> tasks3=new ArrayDeque<Pointer>();
 		ArrayDeque<Pointer> tasks4=new ArrayDeque<Pointer>();
 
-		//generowanie ci¹gu stron: proces1[0]; proces2[0]; ... procesn[0]; proces1[1]; proces2[1]; ...	procesn[m];
-		for (int n=0; n<256; n++){								
-			for (int i=0; i<processes.length; i++)
-				if(n<processes[i].tasks.length){
-					tasks.add(processes[i].tasks[n]);
-					tasks2.add(processes2[i].tasks[n]);
-					tasks3.add(processes3[i].tasks[n]);
-					tasks4.add(processes4[i].tasks[n]);
-				}
+		//generowanie ci¹gu stron
+		for (int i=0; i<pointersQuantity; i++){								
+			int procID = rn.nextInt(processes.length);
+			Pointer pointer = new Pointer(rn.nextInt(processes[procID].pointers)+1, processes[procID]);
+					tasks.add(pointer);
+					tasks2.add(pointer);
+					tasks3.add(pointer);
+					tasks4.add(pointer);
 		}
+		
 		//clou programu
 		przydz_rowny(tasks, processes);
+		resetProcesses(processes);
 		//przydz_rowny(tasks2, processes2);
-		przydz_proporcjonalny(tasks3, processes3, new int[]{7, 10});
-		przydz_priorytetowy(tasks4, processes4, 5);
+		przydz_proporcjonalny(tasks3, processes, new int[]{7, 10});
+		resetProcesses(processes);
+		przydz_priorytetowy(tasks4, processes, 5);
+		resetProcesses(processes);
 		
 	}
 	
@@ -58,6 +62,12 @@ public class Main {
 	static void resetMemory(){
 		for (int i=0; i<memory.length; i++)
 			memory[i]=null;
+	}
+	
+	static void resetProcesses(Process[] proc){
+		for (Process process : proc){
+			process.errors=0;
+		}
 	}
 	
 	static void przydz_rowny(ArrayDeque<Pointer> tasks, Process[] processes){
